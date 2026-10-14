@@ -350,7 +350,7 @@ function renderGallery(): string {
         : 'Open photo'
       return `<button type="button" class="tile${selectClass}" data-id="${escapeHtml(p.id)}" aria-label="${aria}" aria-pressed="${selected ? 'true' : 'false'}">
         ${check}
-        <img src="${escapeHtml(p.url)}" alt="" loading="lazy" />
+        <img src="${escapeHtml(p.thumbUrl ?? p.url)}" data-fallbacks="${escapeHtml((p.thumbFallbacks ?? []).join(' '))}" alt="" loading="lazy" decoding="async" />
         ${p.caption ? `<span class="tile-cap">${escapeHtml(p.caption)}</span>` : ''}
       </button>`
     })
@@ -802,3 +802,18 @@ async function boot(): Promise<void> {
 }
 
 void boot()
+
+// Tile thumb fallback chain: thumbs/<id>.jpg -> render transform -> original
+document.addEventListener(
+  'error',
+  (e) => {
+    const img = e.target
+    if (!(img instanceof HTMLImageElement)) return
+    const list = (img.dataset.fallbacks ?? '').split(' ').filter(Boolean)
+    const next = list.shift()
+    if (!next) return
+    img.dataset.fallbacks = list.join(' ')
+    img.src = next
+  },
+  true,
+)

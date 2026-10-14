@@ -5,6 +5,10 @@ export type Photo = {
   caption: string
   createdAt: string
   url: string
+  /** Small tile image URL (falls back to fallbackUrls then url on error) */
+  thumbUrl?: string
+  /** Ordered fallbacks tried if thumbUrl fails */
+  thumbFallbacks?: string[]
   /** Storage path / blob key; used for deletes and cloud sync */
   path: string
 }
